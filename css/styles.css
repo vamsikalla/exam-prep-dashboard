@@ -287,6 +287,20 @@ select:focus{border-color:var(--accent-blue)}
 .ghost-btn.danger{color:var(--accent-red);border-color:color-mix(in srgb,var(--accent-red) 40%,transparent)}
 .ghost-btn.danger:hover{background:color-mix(in srgb,var(--accent-red) 12%,transparent)}
 .first-run-note{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,var(--accent-blue) 12%,var(--surface-2));border:1px solid color-mix(in srgb,var(--accent-blue) 30%,transparent);border-radius:12px;padding:12px 14px;font-size:.85rem;color:var(--text)}
+
+/* storage picker */
+.storage-seg{width:100%}
+.storage-seg .seg-btn{flex:1;font-size:.85rem}
+.sheet-fields{display:none;flex-direction:column;gap:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:2px}
+.sheet-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sheet-status{font-size:.8rem;color:var(--text-dim)}
+.sheet-status.good{color:var(--accent-green)}
+.sheet-status.bad{color:var(--accent-red)}
+.sheet-help{font-size:.82rem;color:var(--text-dim)}
+.sheet-help summary{cursor:pointer;font-weight:600;color:var(--text);padding:4px 0}
+.sheet-help ol{margin:8px 0 8px 18px;display:flex;flex-direction:column;gap:6px}
+.sheet-help code{font-family:var(--mono);font-size:.78rem;background:var(--surface-strong);padding:1px 5px;border-radius:5px}
+.sheet-help p{margin-top:6px;color:var(--text-faint)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
 /* ---------- Loader / toast ---------- */

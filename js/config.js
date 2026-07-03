@@ -49,6 +49,7 @@ window.CONFIG = {
   STUDY_KEY:    'epd_study_v1',
   MOCK_KEY:     'epd_mocks_v1',
   SETTINGS_KEY: 'epd_settings_v1',
+  BOOTSTRAP_KEY:'epd_bootstrap_v1',   // storage mode + web-app URL (always local)
   INIT_KEY:     'epd_init_v1',
   THEME_KEY:    'epd_theme',
   CACHE_KEY:    'epd_cache_v1',   // used only by network sources

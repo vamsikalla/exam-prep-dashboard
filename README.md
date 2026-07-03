@@ -53,17 +53,27 @@ Set marks-per-section in **⚙ Settings** so the radar and score bars scale to y
 
 ---
 
-## 🔌 Optional: use a Google Sheet instead
+## ☁️ Store & sync via Google Sheets (optional)
 
-Prefer to keep data in a spreadsheet (e.g. to log from a phone via Google Forms)? The app still
-supports it. Edit `js/config.js`:
+Local storage is per-browser and per-device. Want your data to **live in your Google account and
+sync across devices** (laptop, phone, another browser)? Switch on Sheet storage — right inside the app,
+no code editing:
 
-- **Apps Script:** make a sheet with tabs `StudyLog` (Date, Subject, Hours) and `Mocks`
-  (Date, Name, Quant, Reasoning, English, GA, Cutoff), paste `apps-script/Code.gs` into
-  Extensions ▸ Apps Script, deploy as a Web app, put the `/exec` URL in `APPS_SCRIPT_URL`,
-  and set `DATA_SOURCE: 'appsscript'`.
-- **Published CSV:** publish each tab to the web as CSV, set `STUDY_CSV_URL` / `MOCK_CSV_URL`
-  and `DATA_SOURCE: 'csv'`.
+1. Create a **blank Google Sheet** (the tabs are created for you automatically).
+2. **Extensions ▸ Apps Script**, delete any code, paste `apps-script/Code.gs`, and Save.
+3. **Deploy ▸ New deployment ▸ Web app** — *Execute as: Me*, *Who has access: Anyone*. Authorise.
+4. Copy the `/exec` URL → in the app open **⚙ Settings → “☁️ Google Sheet”**, paste the URL,
+   **Test connection**, then **Save settings**.
+
+From then on every add/delete **writes to the sheet** and the app **reads from it**. If you already
+had local entries, it offers to upload them to the sheet on first switch. Open the same page with the
+same URL on any device to see the same data. Flip back to **💾 This browser** anytime.
+
+The sheet gets three tabs — `StudyLog` (Date, Subject, Hours), `Mocks` (Date, Name, Quant, Reasoning,
+English, GA, Total, Cutoff), and `Settings` — each row carries an `id` so edits/deletes stay in sync.
+
+*(Prefer read-only published CSVs instead? Set `STUDY_CSV_URL` / `MOCK_CSV_URL` and
+`DATA_SOURCE: 'csv'` in `js/config.js`.)*
 
 ---
 

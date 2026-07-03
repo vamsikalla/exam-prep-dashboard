@@ -293,6 +293,31 @@
           <label class="field"><span class="field-label">Prep start date</span><input type="date" id="fPrepStart" /></label>
         </div>
         <label class="field"><span class="field-label">Daily study goal (hours)</span><input type="number" id="fDailyGoal" min="1" step="0.5" placeholder="6" /></label>
+
+        <span class="field-label section">Where to store your data</span>
+        <div class="segmented storage-seg" id="storageSeg">
+          <button type="button" class="seg-btn active" data-storage="local">💾 This browser</button>
+          <button type="button" class="seg-btn" data-storage="sheet">☁️ Google Sheet</button>
+        </div>
+        <div class="sheet-fields" id="sheetFields">
+          <label class="field"><span class="field-label">Apps Script Web App URL</span>
+            <input type="url" id="fSheetUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" /></label>
+          <div class="sheet-row">
+            <button type="button" class="ghost-btn" id="btnTestSheet">Test connection</button>
+            <span class="sheet-status" id="sheetStatus"></span>
+          </div>
+          <details class="sheet-help">
+            <summary>How to set up the sheet (one time, ~2 min)</summary>
+            <ol>
+              <li>Create a blank <b>Google Sheet</b> (the tabs are created automatically).</li>
+              <li>In it: <b>Extensions ▸ Apps Script</b>. Delete any code, paste the contents of <code>apps-script/Code.gs</code> from this project, and <b>Save</b>.</li>
+              <li><b>Deploy ▸ New deployment ▸ Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b>. Authorise when asked.</li>
+              <li>Copy the <b>/exec</b> URL, paste it above, hit <b>Test connection</b>, then <b>Save settings</b>.</li>
+            </ol>
+            <p>Your data then lives in your Google account and syncs to any device that opens this page with the same URL.</p>
+          </details>
+        </div>
+
         <span class="field-label section">Marks per section (for score scaling)</span>
         <div class="field-grid" id="settingsMaxFields"></div>
         <div class="modal-foot spread">

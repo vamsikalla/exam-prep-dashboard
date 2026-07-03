@@ -83,6 +83,8 @@
 
   // ---------- Full rebuild when new data lands ----------
   function rebuild() {
+    // In sheet mode the exam settings travel with the data — apply them.
+    if (DataStore.data.settings) Settings.applyExam(DataStore.data.settings);
     const subs = [...new Set(DataStore.data.study.map(s => s.subject))].sort();
     UI.buildSubjectFilter(subs, U.debounce(rerender, 60));
     UI.syncSubjectChecks();
@@ -156,14 +158,15 @@
 
   // ---------- Boot ----------
   function boot() {
-    Settings.apply();          // merge saved exam settings onto CONFIG
+    Settings.applyBootstrap();                                   // point CONFIG at local | sheet
+    if (Settings.storageMode() === 'local') Settings.applyLocalExam();
     UI.initTheme();
     Charts.init();
     Forms.init();
     bindEvents();
 
     DataStore.onUpdate(() => {
-      UI.setStatus(CFG_STATUS(), CONFIG.DATA_SOURCE === 'local' ? '' : 'live');
+      UI.setStatus(Forms.statusText(), Settings.storageMode() === 'sheet' ? 'live' : '');
       rebuild();
     });
 
@@ -172,11 +175,6 @@
       if (!CONFIG.EXAM_DATE) Forms.openSettings(true);
     });
     DataStore.startPolling();
-  }
-  function CFG_STATUS() {
-    const src = { local: '💾 Saved in this browser', appsscript: 'Live · Google Sheets', csv: 'Live · Published CSV' }[CONFIG.DATA_SOURCE];
-    const sN = DataStore.data.study.length, mN = DataStore.data.mocks.length;
-    return `${src} · ${sN} logs · ${mN} mocks`;
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

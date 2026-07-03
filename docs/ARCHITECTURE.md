@@ -43,8 +43,19 @@ Add an entry to `CONFIG.SUBJECTS` (`key`, `label`, `color`, `max`). The mock par
 average-by-subject bar, mock hero chips, and CSV export all iterate that list, so nothing else
 needs to change. Add a matching column (header = the `key` or `label`) to your Mocks sheet.
 
-## Caching & offline
+## Storage layer
 
-`DataStore` writes a compact snapshot to `localStorage` (`epd_cache_v1`) on every commit and
-paints from it instantly on next load while fresh network data is fetched in the background.
-`CACHE_TTL` controls staleness.
+`DataStore` is storage-agnostic and has two backends, chosen by `Settings` (persisted in
+`epd_bootstrap_v1`):
+
+- **local** (default) — study/mocks in `localStorage` (`epd_study_v1`, `epd_mocks_v1`), exam
+  settings in `epd_settings_v1`. Mutations are synchronous but exposed as Promises for a uniform API.
+- **sheet** — a Google Apps Script Web App (`apps-script/Code.gs`). `doGet` returns
+  `{study, mocks, settings}`; `doPost` handles `addStudy` / `addMock` / `deleteStudy` /
+  `deleteMock` / `saveSettings` / `clearAll` / `import`. Writes POST as a *simple* request
+  (`text/plain`, so no CORS preflight — which Apps Script can't answer), then the client re-`GET`s
+  so the sheet stays the single source of truth. Each row carries an `id` for deletes.
+
+Every mutation (`addStudy`, `deleteMock`, …) returns a Promise and works identically in both modes,
+so `forms.js` just `await`s them and the `onUpdate` subscription re-renders. In sheet mode the exam
+settings ride along with the data and are applied to `CONFIG` in `app.rebuild()`.
