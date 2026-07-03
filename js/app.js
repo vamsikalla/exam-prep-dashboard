@@ -88,8 +88,9 @@
     const subs = [...new Set(DataStore.data.study.map(s => s.subject))].sort();
     UI.buildSubjectFilter(subs, U.debounce(rerender, 60));
     UI.syncSubjectChecks();
-    rerender();
-    UI.hideLoader();
+    try { rerender(); }
+    catch (e) { console.error('[render] failed:', e); }
+    finally { UI.hideLoader(); }   // never trap the user on the loading screen
   }
 
   // ---------- Wire events ----------

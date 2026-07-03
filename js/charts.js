@@ -10,7 +10,6 @@ window.Charts = (function () {
   const CFG = window.CONFIG;
   const ids = {
     trend:'chartTrend', pie:'chartPie', daily:'chartDaily',
-    subjhours:'chartSubjectHours',
     mocktrend:'chartMockTrend', radar:'chartRadar',
     subjavg:'chartSubjectAvg', margin:'chartMargin',
   };
@@ -64,7 +63,6 @@ window.Charts = (function () {
     renderTrend(t, ctx);
     renderPie(t, ctx.periodStudy);
     renderDaily(t, ctx);
-    renderSubjectHours(t, ctx.periodStudy);
     renderMockTrend(t, ctx.allMocks);
     renderRadar(t, ctx.allMocks);
     renderSubjectAvg(t, ctx.allMocks);
@@ -73,6 +71,7 @@ window.Charts = (function () {
 
   // 1. Study hours trend --------------------------------------
   function renderTrend(t, ctx) {
+    if (!inst.trend) return;
     const s = Agg.studyTrend(ctx.allStudy, ctx.refDate, ctx.period);
     inst.trend.setOption({
       tooltip: { trigger: 'axis', ...tipStyle(t), valueFormatter: hrs },
@@ -99,6 +98,7 @@ window.Charts = (function () {
 
   // 2. Subject distribution (donut) ---------------------------
   function renderPie(t, study) {
+    if (!inst.pie) return;
     const data = Agg.bySubject(study);
     const totalV = U.sum(data.map(d => d.value)) || 1;
     inst.pie.setOption({
@@ -123,6 +123,7 @@ window.Charts = (function () {
 
   // 3. Daily study hours (bar) --------------------------------
   function renderDaily(t, ctx) {
+    if (!inst.daily) return;
     const s = Agg.dailyHours(ctx.periodStudy, ctx.range.start, ctx.range.end);
     const labels = s.map(x => ctx.period === 'yearly' ? U.fmtDayLabel(x.date) : x.date.getDate());
     inst.daily.setOption({
@@ -145,25 +146,9 @@ window.Charts = (function () {
     }, true);
   }
 
-  // 4. Hours by subject (horizontal bar) ----------------------
-  function renderSubjectHours(t, study) {
-    const data = Agg.bySubject(study).slice(0, 10).reverse();
-    inst.subjhours.setOption({
-      tooltip: { trigger:'axis', axisPointer:{type:'shadow'}, ...tipStyle(t), valueFormatter: hrs },
-      grid: grid(t, { left: 8, right: 44 }),
-      xAxis: valAxis(t, { axisLabel: { color: t.dim, fontSize: 11, formatter: (v)=>v+'h' } }),
-      yAxis: catAxis(t, data.map(d=>d.name)),
-      series: [{
-        type:'bar', data: data.map(d=>({ value:Math.round(d.value*10)/10,
-          itemStyle:{ borderRadius:[0,6,6,0], color:U.subjectColor(d.name) } })),
-        label:{ show:true, position:'right', color:t.dim, fontSize:10, formatter:(p)=>U.fmtShort(p.value)+'h' },
-        barMaxWidth: 20, animationDelay:(i)=>i*40,
-      }],
-    }, true);
-  }
-
   // 5. Mock score vs cutoff over time -------------------------
   function renderMockTrend(t, mocks) {
+    if (!inst.mocktrend) return;
     const s = Agg.mockSeries(mocks);
     const labels = s.map(m => m.name.replace(/^Mock\s*/i,'#').trim() || U.fmtDayLabel(m.date));
     inst.mocktrend.setOption({
@@ -189,6 +174,7 @@ window.Charts = (function () {
 
   // 6. Subject strengths radar --------------------------------
   function renderRadar(t, mocks) {
+    if (!inst.radar) return;
     const avgs = Agg.subjectAverages(mocks);
     inst.radar.setOption({
       tooltip: { ...tipStyle(t) },
@@ -217,6 +203,7 @@ window.Charts = (function () {
 
   // 7. Average score by subject (bar, coloured, w/ max ghost) --
   function renderSubjectAvg(t, mocks) {
+    if (!inst.subjavg) return;
     const avgs = Agg.subjectAverages(mocks);
     inst.subjavg.setOption({
       tooltip: { trigger:'axis', axisPointer:{type:'shadow'}, ...tipStyle(t),
@@ -239,6 +226,7 @@ window.Charts = (function () {
 
   // 8. Cutoff margin per mock (diverging) ---------------------
   function renderMargin(t, mocks) {
+    if (!inst.margin) return;
     const s = Agg.mockSeries(mocks);
     const labels = s.map(m => m.name.replace(/^Mock\s*/i,'#').trim() || U.fmtDayLabel(m.date));
     inst.margin.setOption({
