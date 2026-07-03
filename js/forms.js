@@ -88,6 +88,56 @@ window.Forms = (function () {
     openModal('settingsModal');
   }
 
+  // ---------- Study timer (survives page reload) ----------
+  const Timer = (function () {
+    let state = null;   // { subject, date, accumMs, startedAt, running }
+    let tick = null;
+
+    const persist = () => { try { state ? localStorage.setItem(CFG.TIMER_KEY, JSON.stringify(state)) : localStorage.removeItem(CFG.TIMER_KEY); } catch (_) {} };
+    const load = () => { try { return JSON.parse(localStorage.getItem(CFG.TIMER_KEY)); } catch (_) { return null; } };
+    const elapsedMs = () => !state ? 0 : state.accumMs + (state.running ? Date.now() - state.startedAt : 0);
+    const fmt = (ms) => { const s = Math.floor(ms/1000), p = n => String(n).padStart(2,'0'); return `${p(Math.floor(s/3600))}:${p(Math.floor((s%3600)/60))}:${p(s%60)}`; };
+
+    const paintClock = () => { const el = U.$('#timerClock'); if (el) el.textContent = fmt(elapsedMs()); };
+    function paintMeta() {
+      U.$('#timerSubject').textContent = state.subject;
+      U.$('#timerHintSubj').textContent = state.subject;
+      U.$('#timerDot').style.background = U.subjectColor(state.subject);
+      U.$('#timerDate').textContent = U.relativeDay(U.parseDate(state.date));
+    }
+    const setPausedUI = (paused) => { U.$('#timerPause').textContent = paused ? '▶ Resume' : '⏸ Pause'; U.$('#timerModal').classList.toggle('paused', paused); };
+    const startTick = () => { clearInterval(tick); tick = setInterval(paintClock, 500); paintClock(); };
+
+    function open() { paintMeta(); setPausedUI(!state.running); openModal('timerModal'); startTick(); }
+
+    function start(subject, date) {
+      state = { subject, date: date || U.isoDate(new Date()), accumMs: 0, startedAt: Date.now(), running: true };
+      persist(); open();
+    }
+    function togglePause() {
+      if (!state) return;
+      if (state.running) { state.accumMs += Date.now() - state.startedAt; state.running = false; }
+      else { state.startedAt = Date.now(); state.running = true; }
+      persist(); setPausedUI(!state.running); paintClock();
+    }
+    async function stop(save) {
+      clearInterval(tick); tick = null;
+      if (!state) { closeAll(); return; }
+      const ms = elapsedMs(), subject = state.subject, date = state.date;
+      state = null; persist();
+      U.$('#timerModal').classList.remove('open'); document.body.style.overflow = '';
+      if (!save) { U.toast('Timer discarded — nothing logged'); return; }
+      if (ms < 30000) { U.toast('Under 30s — nothing logged'); return; }
+      const hours = Math.round(ms / 3600000 * 100) / 100;
+      try { const e = await DataStore.addStudy({ date, subject, hours }); U.toast(`Logged ${U.fmtHours(e.hours)} of ${e.subject} ✔`); }
+      catch (err) { U.toast(err.message || 'Could not save'); }
+    }
+    function restore() { const s = load(); if (s && s.subject) { state = s; open(); } }
+    const isOpen = () => U.$('#timerModal').classList.contains('open');
+
+    return { start, togglePause, stop, restore, isOpen };
+  })();
+
   function readExamForm() {
     const subjectMax = {}; U.$$('#settingsMaxFields input').forEach(i => subjectMax[i.dataset.max] = Number(i.value)||1);
     return {
@@ -195,10 +245,31 @@ window.Forms = (function () {
     U.$('#addMockBtn').addEventListener('click', openMock);
     U.$('#settingsBtn').addEventListener('click', () => openSettings(false));
 
-    // Close controls
-    U.$$('.modal-backdrop').forEach(m => m.addEventListener('mousedown', (e) => { if (e.target === m) closeAll(); }));
+    // Study timer
+    U.$('#startTimerBtn').addEventListener('click', () => {
+      const subject = U.$('#fStudySubject').value.trim();
+      if (!subject) { U.toast('Pick a subject first'); U.$('#fStudySubject').focus(); return; }
+      const date = U.$('#fStudyDate').value;
+      closeAll();
+      Timer.start(subject, date);
+    });
+    U.$('#timerPause').addEventListener('click', () => Timer.togglePause());
+    U.$('#timerStop').addEventListener('click', () => Timer.stop(true));
+    U.$('#timerCloseX').addEventListener('click', () => Timer.stop(true));   // closing = stop & save
+    U.$('#timerDiscard').addEventListener('click', () => Timer.stop(false));
+
+    // Close controls (timer closes with save; other modals just close)
+    U.$$('.modal-backdrop').forEach(m => m.addEventListener('mousedown', (e) => {
+      if (e.target !== m) return;
+      if (m.id === 'timerModal') Timer.stop(true); else closeAll();
+    }));
     U.$$('[data-close]').forEach(b => b.addEventListener('click', () => closeAll()));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (Timer.isOpen()) Timer.stop(true); else closeAll();
+    });
+
+    Timer.restore();   // resume a timer that was running before a reload
 
     // Delete via delegation
     document.addEventListener('click', async (e) => {

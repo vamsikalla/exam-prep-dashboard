@@ -245,13 +245,34 @@
           <input type="text" id="fStudySubject" list="subjectOptions" placeholder="e.g. Quant" autocomplete="off" required />
           <datalist id="subjectOptions"></datalist>
         </label>
-        <label class="field"><span class="field-label">Hours studied</span>
-          <input type="number" id="fStudyHours" min="0" step="any" inputmode="decimal" placeholder="e.g. 2.5" required /></label>
-        <div class="modal-foot">
-          <button type="button" class="ghost-btn" data-close>Cancel</button>
-          <button type="submit" class="action-btn primary">Save session</button>
+        <label class="field"><span class="field-label">Hours studied <em>(or use the live timer)</em></span>
+          <input type="number" id="fStudyHours" min="0" step="any" inputmode="decimal" placeholder="e.g. 2.5" /></label>
+        <div class="modal-foot spread">
+          <button type="button" class="action-btn" id="startTimerBtn">⏱️ Start timer</button>
+          <div class="foot-right">
+            <button type="button" class="ghost-btn" data-close>Cancel</button>
+            <button type="submit" class="action-btn primary">Save session</button>
+          </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: STUDY TIMER ============ -->
+  <div class="modal-backdrop" id="timerModal">
+    <div class="modal glass timer-modal">
+      <div class="modal-head"><h3>⏱️ Study Timer</h3><button class="modal-x" id="timerCloseX" title="Stop &amp; save">✕</button></div>
+      <div class="modal-body timer-body">
+        <div class="timer-subject"><span class="dot" id="timerDot"></span><span id="timerSubject">—</span></div>
+        <div class="timer-date" id="timerDate"></div>
+        <div class="timer-clock" id="timerClock">00:00:00</div>
+        <div class="timer-controls">
+          <button type="button" class="action-btn" id="timerPause">⏸ Pause</button>
+          <button type="button" class="ghost-btn danger" id="timerDiscard">Discard</button>
+          <button type="button" class="action-btn primary" id="timerStop">⏹ Stop &amp; save</button>
+        </div>
+        <p class="timer-hint">Closing this window stops the timer and logs the time to <b id="timerHintSubj">this subject</b>.</p>
+      </div>
     </div>
   </div>
 

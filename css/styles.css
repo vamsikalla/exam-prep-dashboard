@@ -283,6 +283,18 @@ select:focus{border-color:var(--accent-blue)}
 .mock-verdict.bad{color:var(--accent-red)}
 .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
 .modal-foot.spread{justify-content:space-between;align-items:center;flex-wrap:wrap}
+.foot-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* study timer */
+.timer-body{align-items:center;text-align:center;gap:16px}
+.timer-subject{display:flex;align-items:center;gap:10px;font-size:1.15rem;font-weight:700}
+.timer-subject .dot{width:12px;height:12px;border-radius:50%}
+.timer-date{font-size:.8rem;color:var(--text-faint);margin-top:-8px}
+.timer-clock{font-family:var(--mono);font-weight:800;font-size:clamp(3rem,15vw,5.2rem);line-height:1;letter-spacing:.01em;
+  background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.timer-modal.paused .timer-clock{opacity:.45;filter:grayscale(.4)}
+.timer-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.timer-hint{font-size:.76rem;color:var(--text-faint);max-width:340px}
 .danger-zone{display:flex;gap:8px;flex-wrap:wrap}
 .ghost-btn.danger{color:var(--accent-red);border-color:color-mix(in srgb,var(--accent-red) 40%,transparent)}
 .ghost-btn.danger:hover{background:color-mix(in srgb,var(--accent-red) 12%,transparent)}
