@@ -13,7 +13,7 @@ window.UI = (function () {
     const dur = 700, t0 = performance.now();
     elm.classList.add('flash');
     setTimeout(() => elm.classList.remove('flash'), 600);
-    const fmt = (v) => (decimals ? (Math.round(v*10)/10) : Math.round(v)).toLocaleString(CFG.LOCALE);
+    const fmt = (v) => Number(v).toLocaleString(CFG.LOCALE, { maximumFractionDigits: decimals });
     function step(now) {
       const p = U.clamp((now - t0) / dur, 0, 1);
       const eased = 1 - Math.pow(1 - p, 3);
@@ -64,7 +64,7 @@ window.UI = (function () {
       U.$('#cardSub' + n).textContent = c.sub || '';
       const opts = c.format === 'hours'   ? { suffix: 'h', decimals: 1 }
                  : c.format === 'percent' ? { suffix: '%' }
-                 : c.format === 'score'   ? { suffix: c.suffix || '' }
+                 : c.format === 'score'   ? { suffix: c.suffix || '', decimals: 2 }
                  : {};
       const valEl = U.$('#cardValue' + n);
       countUp(valEl, c.value, opts);

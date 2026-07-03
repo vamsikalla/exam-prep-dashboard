@@ -24,7 +24,7 @@ window.Forms = (function () {
     CFG.SUBJECTS.forEach(s => {
       const f = U.el('label', 'field');
       f.innerHTML = `<span class="field-label"><span class="dot" style="background:${s.color}"></span>${s.label} <em>/ ${s.max}</em></span>
-        <input type="number" min="0" max="${s.max}" step="1" data-score="${s.key}" placeholder="0" />`;
+        <input type="number" min="0" max="${s.max}" step="any" inputmode="decimal" data-score="${s.key}" placeholder="0" />`;
       scoreBox.appendChild(f);
     });
     scoreBox.querySelectorAll('input').forEach(i => i.addEventListener('input', updateMockTotal));
@@ -39,7 +39,7 @@ window.Forms = (function () {
   }
 
   function updateMockTotal() {
-    const total = U.sum(U.$$('#mockScoreFields input').map(i => Number(i.value) || 0));
+    const total = Math.round(U.sum(U.$$('#mockScoreFields input').map(i => Number(i.value) || 0)) * 100) / 100;
     U.$('#fMockTotal').textContent = total;
     const cutoff = Number(U.$('#fMockCutoff').value) || 0;
     const badge = U.$('#fMockVerdict');

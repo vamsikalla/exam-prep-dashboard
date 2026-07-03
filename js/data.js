@@ -191,7 +191,8 @@ window.DataStore = (function () {
   store.addMock = async function (input) {
     const d = U.parseDate(input.date); if (!d) throw new Error('Enter a valid date');
     const keys = subjectKeys(); const scores = {}; keys.forEach(k => scores[k] = Number(input.scores?.[k])||0);
-    const entry = { id: uid(), date: d, name: String(input.name||`Mock ${U.isoDate(d)}`).trim(), scores, total: U.sum(keys.map(k=>scores[k])), cutoff: Number(input.cutoff)||0 };
+    const total = Math.round(U.sum(keys.map(k=>scores[k])) * 100) / 100;
+    const entry = { id: uid(), date: d, name: String(input.name||`Mock ${U.isoDate(d)}`).trim(), scores, total, cutoff: Number(input.cutoff)||0 };
     if (isLocal()) { store.data.mocks.push(entry); emitLocal(); return entry; }
     await postToSheet({ action:'addMock', entry: mockRow(entry) });
     await store.load(); return entry;

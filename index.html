@@ -246,7 +246,7 @@
           <datalist id="subjectOptions"></datalist>
         </label>
         <label class="field"><span class="field-label">Hours studied</span>
-          <input type="number" id="fStudyHours" min="0.25" step="0.25" placeholder="e.g. 2.5" required /></label>
+          <input type="number" id="fStudyHours" min="0" step="any" inputmode="decimal" placeholder="e.g. 2.5" required /></label>
         <div class="modal-foot">
           <button type="button" class="ghost-btn" data-close>Cancel</button>
           <button type="submit" class="action-btn primary">Save session</button>
@@ -267,7 +267,7 @@
         <span class="field-label section">Section scores</span>
         <div class="field-grid" id="mockScoreFields"></div>
         <div class="field-row">
-          <label class="field"><span class="field-label">Cutoff marks</span><input type="number" id="fMockCutoff" min="0" step="1" placeholder="e.g. 90" /></label>
+          <label class="field"><span class="field-label">Cutoff marks</span><input type="number" id="fMockCutoff" min="0" step="any" inputmode="decimal" placeholder="e.g. 90.25" /></label>
           <div class="field total-field">
             <span class="field-label">Total score</span>
             <div class="total-line"><span class="total-num" id="fMockTotal">0</span><span class="mock-verdict" id="fMockVerdict"></span></div>
