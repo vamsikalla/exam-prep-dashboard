@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#05070f" />
+  <title>Exam Prep Tracker</title>
+  <meta name="description" content="A study-hours, mock-score & countdown analytics dashboard for exam preparation." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/themes.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- Third-party libraries (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar glass">
+    <div class="brand">
+      <div class="brand-logo">🎯</div>
+      <div class="brand-text">
+        <h1>Exam Prep Tracker</h1>
+        <span id="dataStatus" class="data-status">Loading…</span>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="segmented" id="periodSelector" role="tablist" aria-label="Aggregation period">
+        <button class="seg-btn" data-period="daily">Daily</button>
+        <button class="seg-btn" data-period="weekly">Weekly</button>
+        <button class="seg-btn active" data-period="monthly">Monthly</button>
+        <button class="seg-btn" data-period="yearly">Yearly</button>
+      </div>
+
+      <label class="date-picker glass-soft" title="Pick a reference date">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M7 2v3M17 2v3M3 8h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>
+        <input type="date" id="refDate" />
+      </label>
+
+      <button class="action-btn primary" id="addStudyBtn" title="Log a study session">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 5v14M5 12h14"/></svg><span>Log Study</span>
+      </button>
+      <button class="action-btn" id="addMockBtn" title="Add a mock score">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 5v14M5 12h14"/></svg><span>Add Mock</span>
+      </button>
+
+      <button class="icon-btn" id="settingsBtn" title="Exam settings">
+        <svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </button>
+
+      <button class="icon-btn" id="themeToggle" title="Toggle theme">
+        <svg viewBox="0 0 24 24" class="ic ic-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+        <svg viewBox="0 0 24 24" class="ic ic-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+
+      <div class="export-menu">
+        <button class="icon-btn" id="exportBtn" title="Export">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M12 15V3M7 10l5 5 5-5M5 21h14"/></svg>
+        </button>
+        <div class="export-dropdown glass" id="exportDropdown">
+          <button data-export="pdf">Export PDF</button>
+          <button data-export="csv">Export mocks CSV</button>
+          <button data-export="png">Export PNG (view)</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ============ COUNTDOWN HERO ============ -->
+    <section class="panel glass countdown" id="countdown" data-urgency="low">
+      <div class="cd-main">
+        <div class="cd-num-wrap">
+          <span class="cd-num" id="cdDays">—</span>
+          <span class="cd-days-label" id="cdDaysLabel">days to go</span>
+        </div>
+        <div class="cd-meta">
+          <span class="cd-exam-name" id="cdExamName">Exam</span>
+          <span class="cd-exam-date" id="cdExamDate">—</span>
+          <span class="cd-weeks">⏳ <span id="cdWeeks">—</span> remaining</span>
+        </div>
+      </div>
+      <div class="cd-right">
+        <div class="cd-prep-top">
+          <span>Preparation progress</span>
+          <span id="cdElapsed"></span>
+        </div>
+        <div class="cd-bar"><div class="cd-fill" id="cdFill"></div></div>
+        <div class="cd-prep-top"><span id="cdProgress">—</span></div>
+      </div>
+    </section>
+
+    <!-- ============ SUMMARY CARDS (adaptive per period) ============ -->
+    <section class="cards-grid" id="summaryCards">
+      <article class="stat-card glass" id="card1" data-accent="blue">
+        <div class="stat-icon" id="cardIcon1">📚</div>
+        <div class="stat-body"><span class="stat-label" id="cardLabel1">—</span><span class="stat-value" id="cardValue1">0</span><span class="stat-sub" id="cardSub1"></span></div>
+      </article>
+      <article class="stat-card glass" id="card2" data-accent="purple">
+        <div class="stat-icon" id="cardIcon2">⏱️</div>
+        <div class="stat-body"><span class="stat-label" id="cardLabel2">—</span><span class="stat-value" id="cardValue2">0</span><span class="stat-sub" id="cardSub2"></span></div>
+      </article>
+      <article class="stat-card glass" id="card3" data-accent="green">
+        <div class="stat-icon" id="cardIcon3">📝</div>
+        <div class="stat-body"><span class="stat-label" id="cardLabel3">—</span><span class="stat-value" id="cardValue3">0</span><span class="stat-sub" id="cardSub3"></span></div>
+      </article>
+      <article class="stat-card glass" id="card4" data-accent="amber">
+        <div class="stat-icon" id="cardIcon4">🏆</div>
+        <div class="stat-body"><span class="stat-label" id="cardLabel4">—</span><span class="stat-value" id="cardValue4">0</span><span class="stat-sub" id="cardSub4"></span></div>
+      </article>
+    </section>
+
+    <!-- ============ MOCK HERO (latest / best mock vs cutoff) ============ -->
+    <section class="panel glass mock-hero" id="mockHero" hidden>
+      <div class="mh-top">
+        <h2 class="mh-title">Mock Performance <span id="mhName" style="font-weight:600;color:var(--text-dim)"></span></h2>
+        <span class="mh-date" id="mhDate"></span>
+      </div>
+      <div class="mh-nums">
+        <div class="mh-score-wrap"><span class="mh-score" id="mhScore">0</span><span class="mh-out" id="mhOutOf">/ 0</span></div>
+        <div class="mh-cut"><span class="k">Cutoff</span><span class="v" id="mhCutoff">0</span></div>
+        <span class="mh-badge" id="mhBadge"></span>
+      </div>
+      <div class="mh-bar"><div class="mh-fill" id="mhFill"></div><div class="mh-cutmark" id="mhCutMark"></div></div>
+      <div class="mh-subjects" id="mhSubjects"></div>
+    </section>
+
+    <!-- ============ INSIGHTS ============ -->
+    <section class="panel glass insights-panel">
+      <div class="panel-head">
+        <h2>✨ Smart Insights</h2>
+        <span class="panel-hint">Auto-generated from your study & mocks</span>
+      </div>
+      <div class="insights-track" id="insightsTrack"></div>
+    </section>
+
+    <!-- ============ FILTER BAR ============ -->
+    <section class="panel glass filter-panel">
+      <div class="filter-row">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" class="ic"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="Search subject…" autocomplete="off" />
+        </div>
+
+        <div class="filter-field">
+          <label>Subjects</label>
+          <div class="multiselect" id="categoryFilter">
+            <button class="ms-toggle" id="categoryToggle">All subjects</button>
+            <div class="ms-panel glass" id="categoryPanel"></div>
+          </div>
+        </div>
+
+        <div class="filter-field">
+          <label>Sort study logs</label>
+          <select id="sortSelect">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="highest">Most hours</option>
+            <option value="lowest">Fewest hours</option>
+            <option value="alpha">Alphabetical</option>
+          </select>
+        </div>
+
+        <button class="ghost-btn" id="clearFilters">Clear</button>
+      </div>
+    </section>
+
+    <!-- ============ SECTION: STUDY ANALYSIS ============ -->
+    <div class="section">
+      <div class="section-title"><span class="st-icon">📚</span><h3>Study Analysis</h3></div>
+      <div class="chart-grid">
+        <div class="panel glass chart-card col-8">
+          <div class="panel-head"><h2>Study Hours Trend</h2><span class="panel-hint" id="trendHint"></span></div>
+          <div class="chart" id="chartTrend"></div>
+        </div>
+        <div class="panel glass chart-card col-4">
+          <div class="panel-head"><h2>Time by Subject</h2></div>
+          <div class="chart" id="chartPie"></div>
+        </div>
+        <div class="panel glass chart-card col-8">
+          <div class="panel-head"><h2>Daily Study Hours</h2><span class="panel-hint">dashed line = daily goal</span></div>
+          <div class="chart" id="chartDaily"></div>
+        </div>
+        <div class="panel glass col-4 timeline-panel">
+          <div class="panel-head"><h2>Recent Sessions</h2><span class="panel-hint">newest first</span></div>
+          <div class="timeline" id="studyList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SECTION: MOCK PERFORMANCE ============ -->
+    <div class="section">
+      <div class="section-title"><span class="st-icon">🎯</span><h3>Mock Performance</h3></div>
+      <div class="chart-grid">
+        <div class="panel glass chart-card col-8">
+          <div class="panel-head"><h2>Score vs Cutoff Over Time</h2><span class="panel-hint">dashed = cutoff</span></div>
+          <div class="chart" id="chartMockTrend"></div>
+        </div>
+        <div class="panel glass chart-card col-4">
+          <div class="panel-head"><h2>Subject Strengths</h2><span class="panel-hint">avg · best</span></div>
+          <div class="chart" id="chartRadar"></div>
+        </div>
+        <div class="panel glass chart-card col-6">
+          <div class="panel-head"><h2>Average Score by Subject</h2><span class="panel-hint">vs max marks</span></div>
+          <div class="chart" id="chartSubjectAvg"></div>
+        </div>
+        <div class="panel glass chart-card col-6">
+          <div class="panel-head"><h2>Cutoff Margin per Mock</h2><span class="panel-hint">above / below cutoff</span></div>
+          <div class="chart" id="chartMargin"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SECTION: CONSISTENCY & ACTIVITY ============ -->
+    <div class="section">
+      <div class="section-title"><span class="st-icon">🗓️</span><h3>Consistency &amp; Activity</h3></div>
+      <div class="chart-grid">
+        <div class="panel glass col-7">
+          <div class="panel-head"><h2>Study Calendar</h2><span class="panel-hint" id="calMonthLabel"></span></div>
+          <div class="spend-calendar" id="spendCalendar"></div>
+        </div>
+        <div class="panel glass col-5 timeline-panel">
+          <div class="panel-head"><h2>Mock Timeline</h2><span class="panel-hint">✓ cleared · ✕ missed</span></div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ MODAL: LOG STUDY ============ -->
+  <div class="modal-backdrop" id="studyModal">
+    <div class="modal glass">
+      <div class="modal-head"><h3>📚 Log Study Session</h3><button class="modal-x" data-close>✕</button></div>
+      <form id="studyForm" class="modal-body">
+        <label class="field"><span class="field-label">Date</span><input type="date" id="fStudyDate" required /></label>
+        <label class="field"><span class="field-label">Subject</span>
+          <input type="text" id="fStudySubject" list="subjectOptions" placeholder="e.g. Quant" autocomplete="off" required />
+          <datalist id="subjectOptions"></datalist>
+        </label>
+        <label class="field"><span class="field-label">Hours studied</span>
+          <input type="number" id="fStudyHours" min="0.25" step="0.25" placeholder="e.g. 2.5" required /></label>
+        <div class="modal-foot">
+          <button type="button" class="ghost-btn" data-close>Cancel</button>
+          <button type="submit" class="action-btn primary">Save session</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: ADD MOCK ============ -->
+  <div class="modal-backdrop" id="mockModal">
+    <div class="modal glass">
+      <div class="modal-head"><h3>📝 Add Mock Score</h3><button class="modal-x" data-close>✕</button></div>
+      <form id="mockForm" class="modal-body">
+        <div class="field-row">
+          <label class="field"><span class="field-label">Date</span><input type="date" id="fMockDate" required /></label>
+          <label class="field"><span class="field-label">Mock name</span><input type="text" id="fMockName" placeholder="Mock #1" required /></label>
+        </div>
+        <span class="field-label section">Section scores</span>
+        <div class="field-grid" id="mockScoreFields"></div>
+        <div class="field-row">
+          <label class="field"><span class="field-label">Cutoff marks</span><input type="number" id="fMockCutoff" min="0" step="1" placeholder="e.g. 90" /></label>
+          <div class="field total-field">
+            <span class="field-label">Total score</span>
+            <div class="total-line"><span class="total-num" id="fMockTotal">0</span><span class="mock-verdict" id="fMockVerdict"></span></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="ghost-btn" data-close>Cancel</button>
+          <button type="submit" class="action-btn primary">Save mock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: SETTINGS ============ -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal glass">
+      <div class="modal-head"><h3>⚙️ Exam Settings</h3><button class="modal-x" data-close>✕</button></div>
+      <form id="settingsForm" class="modal-body">
+        <div class="first-run-note" id="settingsFirstRunNote"><span>👋</span><span>Welcome! Set your exam date to start the countdown. You can change everything later.</span></div>
+        <label class="field"><span class="field-label">Exam name</span><input type="text" id="fExamName" placeholder="e.g. SBI PO Prelims" required /></label>
+        <div class="field-row">
+          <label class="field"><span class="field-label">Exam date</span><input type="date" id="fExamDate" required /></label>
+          <label class="field"><span class="field-label">Prep start date</span><input type="date" id="fPrepStart" /></label>
+        </div>
+        <label class="field"><span class="field-label">Daily study goal (hours)</span><input type="number" id="fDailyGoal" min="1" step="0.5" placeholder="6" /></label>
+        <span class="field-label section">Marks per section (for score scaling)</span>
+        <div class="field-grid" id="settingsMaxFields"></div>
+        <div class="modal-foot spread">
+          <div class="danger-zone">
+            <button type="button" class="ghost-btn" id="btnLoadSample">Load sample data</button>
+            <button type="button" class="ghost-btn danger" id="btnClearAll">Clear all data</button>
+          </div>
+          <button type="submit" class="action-btn primary">Save settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loader-overlay" id="loader"><div class="spinner"></div><span>Loading your prep data…</span></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- App scripts (order matters) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/aggregations.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/forms.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
