@@ -235,6 +235,31 @@ select:focus{border-color:var(--accent-blue)}
 .tl-amt.high{color:var(--accent-red)}
 .tl-out{font-size:.72rem;color:var(--text-faint);font-weight:600}
 
+/* ---------- Day-by-day prep log ---------- */
+.daylog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-height:660px;overflow-y:auto;padding-right:4px}
+.daylog-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 15px;display:flex;flex-direction:column;gap:10px;animation:rise .5s both}
+.daylog-card:hover{border-color:var(--border-strong)}
+.dl-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.dl-date{font-weight:700;font-size:.9rem}
+.dl-total{font-family:var(--mono);font-weight:800;font-size:1.05rem;color:var(--accent-blue)}
+.dl-subjs{display:flex;flex-direction:column;gap:8px}
+.dl-subj{display:grid;grid-template-columns:minmax(74px,34%) 1fr auto;align-items:center;gap:10px}
+.dl-subj-name{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dl-bar{height:8px;border-radius:6px;background:var(--surface-strong);overflow:hidden;min-width:40px}
+.dl-bar-fill{display:block;height:100%;border-radius:6px;transition:width .6s cubic-bezier(.22,.61,.36,1)}
+.dl-subj-h{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--text-dim);white-space:nowrap}
+.dl-empty{font-size:.78rem;color:var(--text-faint);font-style:italic}
+.dl-mocks{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:9px}
+.dl-mock{display:flex;align-items:center;gap:8px;font-size:.8rem;background:var(--surface-strong);border-radius:9px;padding:6px 10px}
+.dl-mock-ic{flex-shrink:0}
+.dl-mock-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dl-mock-score{margin-left:auto;font-family:var(--mono);font-weight:800;flex-shrink:0}
+.dl-mock-out{font-size:.7rem;color:var(--text-faint);font-weight:600}
+.dl-mock-badge{font-weight:700;font-size:.74rem;white-space:nowrap;flex-shrink:0}
+.dl-mock.ok .dl-mock-badge{color:var(--accent-green)}
+.dl-mock.bad .dl-mock-badge{color:var(--accent-red)}
+
 /* ---------- Action buttons (Log Study / Add Mock) ---------- */
 .action-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface-strong);color:var(--text);font:inherit;font-size:.86rem;font-weight:600;padding:9px 14px;border-radius:12px;cursor:pointer;transition:var(--transition)}
 .action-btn:hover{transform:translateY(-2px);border-color:var(--border-strong)}

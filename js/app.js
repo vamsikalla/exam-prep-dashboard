@@ -76,6 +76,7 @@
     UI.renderInsights(Agg.insights(ctx.allStudy, ctx.allMocks, state.refDate, state.period, cd));
 
     Charts.render(ctx);
+    UI.renderDailyLog(Agg.dailyLog(ctx.periodStudy, ctx.periodMocks));
     UI.renderMockTimeline(ctx.allMocks);
     UI.renderStudyList(ctx.allStudy);
     UI.renderCalendar(ctx.allStudy, state.refDate);

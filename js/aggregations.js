@@ -103,6 +103,32 @@ window.Agg = (function () {
     return { current, best };
   }
 
+  // day-by-day prep log: one entry per active date (study + mocks), newest first.
+  // Feed it period-scoped rows and it follows whatever period/date is selected.
+  function dailyLog(study, mocks) {
+    const map = new Map();   // isoDate -> { date, hours, subjects:Map, mocks:[] }
+    const ensure = (d) => {
+      const k = U.isoDate(d);
+      if (!map.has(k)) map.set(k, { date: U.startOfDay(d), hours: 0, subjects: new Map(), mocks: [] });
+      return map.get(k);
+    };
+    study.forEach(s => {
+      const day = ensure(s.date);
+      day.hours += s.hours;
+      day.subjects.set(s.subject, (day.subjects.get(s.subject) || 0) + s.hours);
+    });
+    (mocks || []).forEach(m => ensure(m.date).mocks.push(m));
+
+    return Array.from(map.values()).map(d => ({
+      date: d.date,
+      hours: Math.round(d.hours * 100) / 100,
+      subjects: Array.from(d.subjects, ([name, hours]) => ({
+        name, hours: Math.round(hours * 100) / 100, color: U.subjectColor(name),
+      })).sort((a, b) => b.hours - a.hours),
+      mocks: d.mocks.slice().sort((a, b) => b.total - a.total),
+    })).sort((a, b) => b.date - a.date);
+  }
+
   // month grid for the study calendar (hours)
   function monthGrid(study, refDate) {
     const y = refDate.getFullYear(), m = refDate.getMonth();
@@ -245,7 +271,7 @@ window.Agg = (function () {
 
   return {
     periodRange, filterRange, countdown,
-    totalHours, bySubject, dailyHours, studyTrend, studyStreak, monthGrid,
+    totalHours, bySubject, dailyHours, studyTrend, studyStreak, dailyLog, monthGrid,
     maxTotal, mockSeries, subjectAverages, subjectStrength, clearanceRate,
     insights,
   };

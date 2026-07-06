@@ -163,6 +163,46 @@ window.UI = (function () {
   const emptyState = (emoji, title, hint) =>
     `<div class="empty-state"><span class="es-emoji">${emoji}</span><span class="es-title">${title}</span><span class="es-hint">${hint}</span></div>`;
 
+  // ---------- Day-by-day prep log (cards) ----------
+  const dlDayLabel = (d) => `${U.DOW[(d.getDay()+6)%7]}, ${U.fmtDayLabel(d)} ${d.getFullYear()}`;
+  function renderDailyLog(log) {
+    const box = U.$('#dailyLog');
+    if (!box) return;
+    box.innerHTML = '';
+    if (!log.length) {
+      box.innerHTML = emptyState('🗓️', 'No activity in this period', 'Log study sessions or add mocks to see your day-by-day prep here.');
+      return;
+    }
+    const maxT = Agg.maxTotal();
+    log.forEach((d, i) => {
+      const dayMax = Math.max(...d.subjects.map(s => s.hours), 0.001);
+      const subjRows = d.subjects.map(s => {
+        const pct = U.clamp(Math.round(s.hours / dayMax * 100), 8, 100);
+        return `<div class="dl-subj">
+          <span class="dl-subj-name"><span class="dl-dot" style="background:${s.color}"></span>${escapeHtml(s.name)}</span>
+          <span class="dl-bar"><span class="dl-bar-fill" style="width:${pct}%;background:${s.color}"></span></span>
+          <span class="dl-subj-h">${U.fmtHours(s.hours)}</span>
+        </div>`;
+      }).join('');
+      const mockRows = d.mocks.map(m => {
+        const cleared = m.total >= m.cutoff;
+        return `<div class="dl-mock ${cleared?'ok':'bad'}">
+          <span class="dl-mock-ic">📝</span>
+          <span class="dl-mock-name">${escapeHtml(m.name)}</span>
+          <span class="dl-mock-score">${m.total}<span class="dl-mock-out">/${maxT}</span></span>
+          <span class="dl-mock-badge">${cleared?`✓ +${m.total-m.cutoff}`:`✕ −${m.cutoff-m.total}`}</span>
+        </div>`;
+      }).join('');
+      const card = U.el('div', 'daylog-card');
+      card.style.animationDelay = Math.min(i * 0.03, 0.4) + 's';
+      card.innerHTML =
+        `<div class="dl-head"><span class="dl-date">${dlDayLabel(d.date)}</span><span class="dl-total">${U.fmtHours(d.hours)}</span></div>
+         <div class="dl-subjs">${subjRows || '<span class="dl-empty">No study logged</span>'}</div>
+         ${mockRows ? `<div class="dl-mocks">${mockRows}</div>` : ''}`;
+      box.appendChild(card);
+    });
+  }
+
   // ---------- Study calendar (hours heatmap) ----------
   function renderCalendar(study, refDate) {
     const { cells, monthLabel } = Agg.monthGrid(study, refDate);
@@ -236,7 +276,7 @@ window.UI = (function () {
 
   return {
     countUp, renderCountdown, updateCards, setMockHero, renderInsights,
-    renderMockTimeline, renderStudyList, renderCalendar,
+    renderMockTimeline, renderStudyList, renderDailyLog, renderCalendar,
     buildSubjectFilter, syncSubjectChecks, updateSubjectLabel,
     initTheme, toggleTheme, setStatus, hideLoader,
   };
